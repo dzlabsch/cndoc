@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CodeNotary Document Notarization</title>
+  <link rel="icon" href="img/logo.png">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/jquery.orgchart.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+  <style type="text/css">
+    .orgchart { background: #fff; }
+    .orgchart td.left, .orgchart td.right, .orgchart td.top { border-color: #aaa; }
+    .orgchart td>.down { background-color: #aaa; }
+    .orgchart .main .title { background-color: #ffa500; }
+    .orgchart .main .content { border-color: #ffa500; }
+    .orgchart .signed0 .title { background-color: #009933; }
+    .orgchart .signed0 .content { border-color: #009933; }
+    .orgchart .signed1 .title { background-color: #ff0033; }
+    .orgchart .signed1 .content { border-color: #ff0033; }
+    .myHash { width: 800px; margin:0 auto; text-align: center; }
+  </style>
+</head>
+<body>
+    <div class="myHash">
+        <h2>Input Hash</h2>
+	<div class="md-form">
+	  <i class="fas fa-pencil-alt prefix"></i>
+	  <textarea class="md-textarea form-control" rows="1" id="myHash"></textarea>
+	  <input type="file" maxlength="64" size="66"/>
+	</div>
+	<script>
+		document.querySelector('input').onchange = function(){
+		var reader = new FileReader()
+		reader.readAsArrayBuffer(this.files[0])
+		reader.onload = function(){
+		crypto.subtle.digest("SHA-256", this.result)
+		.then(function(buffer) {
+		var hexCodes = []
+		var view = new DataView(buffer)
+		for (var i = 0; i < view.byteLength; i += 1) {
+		var stringValue = view.getUint8(i).toString(16)
+		var paddedValue = ('0' + stringValue).slice(-2)
+		hexCodes.push(paddedValue)}
+		var mySha = (hexCodes.join(""))
+	        document.getElementById('myHash').value = mySha
+                start(mySha);                
+		})}}
+	</script>
+    </div>
+
+<div id="chart-container"></div>
+
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/jquery.orgchart.js"></script>
+  <script type="text/javascript">
+    var re = new RegExp('"status":0');
+    function getVerification(hash,signer) {
+     myurl = "https://api.codenotary.io/authenticate/" + hash + "?signers=" + signer;
+     console.log(myurl);
+    var authstatus= $.ajax({
+    type: 'GET',
+    url: myurl,
+    async: false,
+    dataType: 'json',
+    done: function(response) {
+        return response;
+    }
+    }).responseText;
+	    console.log(authstatus);
+    if (re.test(authstatus)) {
+        return "signed0";
+	console.log("signed0");
+       } else {
+        console.log("signed1");
+        return "signed1";	
+       }
+     };  
+
+    function getSignDate(hash,signer) {
+     myurl = "https://api.codenotary.io/authenticate/" + hash + "?signers=" + signer;
+     console.log(myurl);
+    var authstatus= $.ajax({
+    type: 'GET',
+    url: myurl,
+    async: false,
+    dataType: 'json',
+    done: function(response) {
+        return response;
+    }
+    }).responseText;
+            console.log(authstatus);
+    if (re.test(authstatus)) {
+        let myjson =  JSON.parse(authstatus);
+	return myjson.verification.timestamp;
+       } else {
+        return "n/a";
+       }
+     };
+
+    function start(hash) {
+    $(function() {
+    var datasource = {
+      'name': 'signer_workflow.pptx',
+      'title': hash,
+      'signerId': hash,
+      'className': 'main',
+      'children': [
+        { 'name': 'DZ Opvizor', 'title': getSignDate(hash,"0x5a1917dec5f2128ad8a6928f488a353aa5e606ab"), 'signerId': '0x5a1917dec5f2128ad8a6928f488a353aa5e606ab', 'className': getVerification(hash,"0x5a1917dec5f2128ad8a6928f488a353aa5e606ab") },
+        { 'name': 'DZ DZLabs', 'title': getSignDate(hash,"0x4a1c0a803a03f1a695cc372f2b863aa846d08948"), 'signerId': '0x4a1c0a803a03f1a695cc372f2b863aa846d08948', 'className':  getVerification(hash,"0x4a1c0a803a03f1a695cc372f2b863aa846d08948") },
+        { 'name': 'DZ vChain', 'title': getSignDate(hash,"0x7037f8ce7e3ec0a4830e55781b29368f22e4fc57"), 'signerId': '0x7037f8ce7e3ec0a4830e55781b29368f22e4fc57', 'className': getVerification(hash,"0x7037f8ce7e3ec0a4830e55781b29368f22e4fc57") },
+        { 'name': 'Demo CodeNotary', 'title': getSignDate(hash,"0xa6f8ee5e9edbc5722a3b7f104c9ae13da3d7b68f"), 'signerId': '0xa6f8ee5e9edbc5722a3b7f104c9ae13da3d7b68f', 'className': getVerification(hash,"0xa6f8ee5e9edbc5722a3b7f104c9ae13da3d7b68f") },
+        { 'name': 'Demo Github', 'title': 'n/a', 'signerId': '0xa6f8ee5e9edbc5722a3b7f124c9ae13da3d7bddf', 'className': 'signed1' }
+      ]
+    };
+
+    $('#chart-container').orgchart({
+      'data' : datasource,
+      'nodeContent': 'title'
+    });
+
+  });
+  };
+  </script>
+  </body>
+</html>
+

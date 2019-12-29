@@ -1,0 +1,22 @@
+{
+  "name": "codenotary-workflow",
+  "version": "1.0.0",
+  "description": "Simple CodeNotary Workflow PoC",
+  "main": "server.js",
+  "style": [
+    "./dist/css/jquery.orgchart.min.css"
+  ],
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "dennis <dennis@vchain.us>",
+  "license": "Apache 2",
+  "dependencies": {
+    "express": "^4.17.1",
+    "font-awesome": "^4.6.3",
+    "html2canvas": "^1.0.0-rc.5",
+    "jquery": "^3.4.1",
+    "jquery-mockjax": "^2.5.0",
+    "jspdf": "^1.5.3"
+  }
+}
