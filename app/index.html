@@ -28,7 +28,7 @@
 	<div class="md-form">
 	  <i class="fas fa-pencil-alt prefix"></i>
 	  <textarea class="md-textarea form-control" rows="1" id="myHash"></textarea>
-	  <input type="file" maxlength="64" size="66"/>
+	  <input type="file" id="fileselect" maxlength="64" size="66"/>
 	</div>
 	<script>
 		document.querySelector('input').onchange = function(){
@@ -101,8 +101,9 @@
 
     function start(hash) {
     $(function() {
+    var fileName = document.getElementById('fileselect').files[0].name;	
     var datasource = {
-      'name': 'signer_workflow.pptx',
+      'name': fileName,
       'title': hash,
       'signerId': hash,
       'className': 'main',
